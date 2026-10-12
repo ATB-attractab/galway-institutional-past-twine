@@ -115,29 +115,42 @@ tw-passage img {
   box-shadow: 0 1px 2px rgba(0,0,0,0.15), 0 8px 22px rgba(60,40,20,0.16);
 }
 
-/* Wide, short embeds (a StoryMaps Sidecar): photo in a left column,
-   text and choices in a right column */
+/* ---------- Photo passages, wide embeds (a StoryMaps Sidecar) ----------
+   Left: the photo with the choice buttons underneath. Right: the text.
+   The photo's space is reserved before it loads, so nothing jumps. */
 @media (min-width: 720px) and (min-aspect-ratio: 5/4) {
-  tw-passage:has(> img) {
-    position: relative;
-    max-width: 62rem;
-    padding-left: calc(40% + 1.5rem);
-    min-height: 60vh;
-  }
-  tw-passage:has(> img) > img:first-of-type {
-    position: absolute;
-    left: 0;
-    top: 1.25rem;
+  tw-passage:has(img) { max-width: 62rem; }
+  /* Harlowe wraps a new passage in this while it fades in */
+  tw-passage tw-transition-container { display: block; width: 100%; }
+  :is(tw-passage, tw-transition-container):has(> img) > img:first-of-type {
+    float: left;
     width: 40% !important;
     max-width: 40% !important;
-    max-height: calc(100vh - 3rem);
+    aspect-ratio: 3 / 2;
+    max-height: none;
+    height: auto;
     object-fit: cover;
-    margin: 0;
+    margin: 0.2rem 1.75rem 0.5rem 0;
     box-sizing: border-box;
   }
-  /* no empty line where the photo used to be */
-  tw-passage:has(> img) > img:first-of-type + br,
-  tw-passage:has(> img) > img:first-of-type + br + tw-consecutive-br { display: none; }
+  /* choices stack in the left column, under the photo */
+  :is(tw-passage, tw-transition-container):has(> img) > tw-expression:has(tw-link) {
+    float: left;
+    clear: left;
+    width: 40%;
+    margin-right: 1.75rem;
+  }
+  :is(tw-passage, tw-transition-container):has(> img) > tw-expression:has(tw-link) tw-link {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+    margin: 0.35rem 0;
+  }
+  /* no empty line where the photo sits */
+  :is(tw-passage, tw-transition-container):has(> img) > img:first-of-type + br,
+  :is(tw-passage, tw-transition-container):has(> img) > img:first-of-type + br + tw-consecutive-br { display: none; }
+  :is(tw-passage, tw-transition-container):has(> img)::after { content: ""; display: block; clear: both; }
 }
 
 /* <p class="caption">Claddagh, Galway. NLI Lawrence Collection.</p> */
@@ -285,24 +298,25 @@ tw-sidebar tw-icon[alt], tw-sidebar tw-icon[alt]:hover { opacity: 1; }
 tw-icon[title="Undo"]::after { content: "Back"; font-size: 0.75rem; letter-spacing: 0.04em; }
 tw-icon[title="Redo"]::before { content: "Forward"; font-size: 0.75rem; letter-spacing: 0.04em; }
 tw-icon:hover, tw-icon:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }</style><script role="script" id="twine-user-script" type="text/twine-javascript">/* Mapping Galway's Institutional Past — Story JavaScript
-   Paste into: Story > JavaScript
-   Every time a new passage appears, jump back to the top,
-   so readers inside the ArcGIS embed always start at the beginning. */
+   Paste into: Story > JavaScript (replace everything there).
+   Every new passage starts at the top, so readers inside the
+   ArcGIS embed never land halfway down. */
 (function () {
+  if (!window.MutationObserver) return;
   function toTop() {
     var story = document.querySelector('tw-story');
     if (story) story.scrollTop = 0;
     window.scrollTo(0, 0);
   }
-  var story = document.querySelector('tw-story');
-  if (!story || !window.MutationObserver) return;
+  // Harlowe can rebuild <tw-story>, so watch the whole page for new passages
   new MutationObserver(function (changes) {
     for (var i = 0; i < changes.length; i++) {
-      for (var j = 0; j < changes[i].addedNodes.length; j++) {
-        if (changes[i].addedNodes[j].nodeName === 'TW-PASSAGE') { toTop(); return; }
+      var added = changes[i].addedNodes;
+      for (var j = 0; j < added.length; j++) {
+        if (added[j].nodeName === 'TW-PASSAGE') { toTop(); return; }
       }
     }
-  }).observe(story, { childList: true });
+  }).observe(document.documentElement, { childList: true, subtree: true });
 })();</script><tw-passagedata pid="1" name=" Institutional referral" tags="" position="750,850" size="100,100">[[Institutional care]]</tw-passagedata><tw-passagedata pid="2" name="Approach a doctor or midwife" tags="" position="687.5,475" size="100,100">[[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="3" name="Arrange maternity care" tags="" position="100,600" size="100,100">[[Remain outside institutional care]]
 [[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="4" name="Confide in someone you trust" tags="" position="425,650" size="100,100">[[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="5" name="Continue to conceal the pregnancy" tags="" position="687.5,600" size="100,100">[[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="6" name="Enter institutional care" tags="" position="1225,600" size="100,100">&lt;img src=&quot;https://tse2.mm.bing.net/th/id/OIP.bZOXWj9_MiuBaOzZRlzrMAHaEH?r=0&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3&quot; alt=&quot;Historical photograph of Galway&quot; style=&quot;width:100%; max-width:750px;&quot;&gt;
 
