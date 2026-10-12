@@ -299,9 +299,39 @@ tw-icon[title="Undo"]::after { content: "Back"; font-size: 0.75rem; letter-spaci
 tw-icon[title="Redo"]::before { content: "Forward"; font-size: 0.75rem; letter-spacing: 0.04em; }
 tw-icon:hover, tw-icon:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }</style><script role="script" id="twine-user-script" type="text/twine-javascript">/* Mapping Galway's Institutional Past — Story JavaScript
    Paste into: Story > JavaScript (replace everything there).
-   Every new passage starts at the top, so readers inside the
-   ArcGIS embed never land halfway down. */
+
+   1. Inside ArcGIS StoryMaps the embed box starts small and then grows,
+      which made the layout jump. The story now stays hidden until the
+      box has stopped resizing, then fades in once, already in place.
+   2. Every new passage starts at the top, so readers inside the
+      embed never land halfway down.
+   3. The story always begins at the first passage: Harlowe's
+      remembered place ("Saved Session") is cleared on every load.   */
 (function () {
+  var root = document.documentElement;
+
+  /* ---- 3. always start from the beginning ---- */
+  try { sessionStorage.removeItem('Saved Session'); } catch (e) {}
+
+  /* ---- 1. wait for the embed to settle, then show ---- */
+  root.classList.add('settling');
+  var timer = null;
+  var shown = false;
+  function show() {
+    if (shown) return;
+    shown = true;
+    root.classList.remove('settling');
+    window.removeEventListener('resize', onResize);
+  }
+  function onResize() {
+    clearTimeout(timer);
+    timer = setTimeout(show, 350);      // 350 ms with no resizing = settled
+  }
+  window.addEventListener('resize', onResize);
+  timer = setTimeout(show, 450);        // normal case: show after a short beat
+  setTimeout(show, 2500);               // safety net: never stay hidden
+
+  /* ---- 2. new passage -> back to the top ---- */
   if (!window.MutationObserver) return;
   function toTop() {
     var story = document.querySelector('tw-story');
@@ -316,7 +346,7 @@ tw-icon:hover, tw-icon:focus-visible { color: var(--accent); border-color: var(-
         if (added[j].nodeName === 'TW-PASSAGE') { toTop(); return; }
       }
     }
-  }).observe(document.documentElement, { childList: true, subtree: true });
+  }).observe(root, { childList: true, subtree: true });
 })();</script><tw-passagedata pid="1" name=" Institutional referral" tags="" position="750,850" size="100,100">[[Institutional care]]</tw-passagedata><tw-passagedata pid="2" name="Approach a doctor or midwife" tags="" position="687.5,475" size="100,100">[[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="3" name="Arrange maternity care" tags="" position="100,600" size="100,100">[[Remain outside institutional care]]
 [[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="4" name="Confide in someone you trust" tags="" position="425,650" size="100,100">[[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="5" name="Continue to conceal the pregnancy" tags="" position="687.5,600" size="100,100">[[Seek maternity or public assistance]]</tw-passagedata><tw-passagedata pid="6" name="Enter institutional care" tags="" position="1225,600" size="100,100">&lt;img src=&quot;https://tse2.mm.bing.net/th/id/OIP.bZOXWj9_MiuBaOzZRlzrMAHaEH?r=0&amp;rs=1&amp;pid=ImgDetMain&amp;o=7&amp;rm=3&quot; alt=&quot;Historical photograph of Galway&quot; style=&quot;width:100%; max-width:750px;&quot;&gt;
 
